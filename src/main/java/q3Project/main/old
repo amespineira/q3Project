@@ -11,7 +11,6 @@ import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import org.flywaydb.core.Flyway;
 
 import org.json.JSONObject;
 
@@ -19,8 +18,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import spark.Route;
 
 //import app.NewPlaces;
 
@@ -62,16 +59,6 @@ public class App {
         }
     }
    public static void main(String[] args) {
-	   // Create the Flyway instance
-       Flyway flyway = new Flyway();
-
-       // Point it to the database
-       flyway.setDataSource("jdbc:postgresql://localhost/testdb", "andresespineira", null);
-       flyway.clean();
-       // Start the migration
-       flyway.migrate();
-       
-	   Users users=new Users();
 	   post("/users", (request, response) -> {
 		 Connection conn = null;
 		 Statement stmt = null;
@@ -94,28 +81,28 @@ public class App {
 		  rs.close();
 		  stmt.close();
 		  conn.close();
-		 }
+   }
    
-		  catch(SQLException se){
-				  //Handle errors for JDBC
-				  se.printStackTrace();
-		   }catch(Exception e){
-				  //Handle errors for Class.forName
-				  e.printStackTrace();
-		   }finally{
-				  //finally block used to close resources
-				  try{
-				     if(stmt!=null)
-				        stmt.close();
-				  }catch(SQLException se2){
-				  }// nothing we can do
-				  try{
-				     if(conn!=null)
-				        conn.close();
-				  }catch(SQLException se){
-				     se.printStackTrace();
-				  }//end finally try
-		   }
+  catch(SQLException se){
+		  //Handle errors for JDBC
+		  se.printStackTrace();
+   }catch(Exception e){
+		  //Handle errors for Class.forName
+		  e.printStackTrace();
+   }finally{
+		  //finally block used to close resources
+		  try{
+		     if(stmt!=null)
+		        stmt.close();
+		  }catch(SQLException se2){
+		  }// nothing we can do
+		  try{
+		     if(conn!=null)
+		        conn.close();
+		  }catch(SQLException se){
+		     se.printStackTrace();
+		  }//end finally try
+   }
 		return request;
 	   });
 	   post("/verify", (request, response) -> {
@@ -178,11 +165,5 @@ public class App {
    }
 		return request;
 	   });
-       get("/hello", (req, res) ->	{ 
-    	   
-    	   return users;
-       });
-		   
    }
-
 }
