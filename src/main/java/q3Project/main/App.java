@@ -2,6 +2,8 @@ package q3Project.main;
 
 import java.sql.* ;  // for standard JDBC programs
 import java.math.* ; // for BigDecimal and BigInteger support
+import java.security.Key;
+
 import static spark.Spark.get;
 import static spark.Spark.post;
 import java.sql.Connection;
@@ -21,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import io.jsonwebtoken.impl.crypto.MacProvider;
 import spark.Route;
 
 //import app.NewPlaces;
@@ -40,25 +43,31 @@ public class App {
        Flyway flyway = new Flyway();
 
        // Point it to the database
-       flyway.setDataSource("jdbc:postgresql://localhost/testdb", "Attacktic", null);
+       flyway.setDataSource("jdbc:postgresql://localhost/testdb", null, null);
        flyway.clean();
        // Start the migration
        flyway.migrate();
-       
-	   post("/users", (req, res) -> {
-		Users.createUser(req, res);
-		return req;
+       Key key = MacProvider.generateKey();
+
+	   post("/auth/signup", (req, res) -> {
+		return Auth.createUser(req, res, key);
 	   });
-	   
+	   post("/auth/login", (req, res) -> {
+		  return Auth.Login(req, res, key);
+	   });
 	   post("/verify", (req, res) -> {
 		 Users.Verify(req, res);
 		 return req;
 	   });
 	   
-	   get("/users/:id/data", (req, res) -> {
-		 String id = req.params("id");
-		 Users.userData(id);
-		 return req;
+	   get("/users/:id/data/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){
+			 String id = req.params("id");
+			 return Users.userData(id);
+		   }
+		   else{
+			  return "mismatched user ids";
+		   }
 	   });
    }
 

@@ -1,7 +1,7 @@
 create table Users (
     id SERIAL PRIMARY KEY,
     userName varchar(50) not null,
-    password varchar(50)
+    password varchar(200)
 
 );
 create table Places (
