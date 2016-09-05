@@ -20,7 +20,7 @@ import com.google.gson.JsonParser;
 import spark.Request;
 
 
-public class Users {
+public class UsersRouter {
 	
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
@@ -46,6 +46,15 @@ public class Users {
         		sql = "select * from users where id='" + input + "'";
         	}
             return sql;
+        }
+        public static String getPeople(String id){
+        	return "select * from people where user_id="+id;
+        }
+        public static String getNotes(String id){
+        	return "select * from notes where person_id="+id;
+        }
+        public static String getLinks(String id){
+        	return "select * from links where person_id="+id;
         }
         public static String getPlaces(String user_id){
         	String sql;
@@ -176,6 +185,7 @@ public class Users {
       }
     
     public static String userData (String id){
+    	Gson gson=new Gson();
     	Connection conn = null;
 		Statement stmt = null;
 		Statement people_stmt = null;
@@ -183,22 +193,42 @@ public class Users {
 		  Class.forName("org.postgresql.Driver");
 		  conn = DriverManager.getConnection(DB_URL);
 		  stmt = conn.createStatement();
-		  ResultSet rs = stmt.executeQuery(Model.getPlaces(id));
-		  while(rs.next()){
-			  String place_name = rs.getString("name");
-			  System.out.print(place_name);
-			  people_stmt = conn.createStatement();
-			  ResultSet people_rs = stmt.executeQuery(Model.getPeople(id, "place_id"));
-			  while(people_rs.next()){
-				  String people_fname = rs.getString("first_name");
-				  String people_lname = rs.getString("last_name");
+		  ResultSet people = stmt.executeQuery(Model.getPeople(id));
+		  UserData userData=new UserData();
+		  while(people.next()){
+			 Person next= new Person(people.getString("id"), people.getString("first_name"), people.getString("last_name"), people.getString("user_id"), people.getString("place_id"));
+			 people_stmt = conn.createStatement();
+			 ResultSet notes = people_stmt.executeQuery(Model.getNotes(people.getString("id")));
+			 while(notes.next()){
+				 Note note=new Note(notes.getString("id"), notes.getString("type"), notes.getString("text"));
+				 next.addNote(note);
+			 }
+			 people_stmt = conn.createStatement();
+			 ResultSet links = people_stmt.executeQuery(Model.getLinks(people.getString("id")));
+			 while(links.next()){
+				 Link link=new Link(links.getString("id"), links.getString("name"), links.getString("url"));
+				 next.addLink(link);
+			 }
+			 userData.addPerson(next);
+		  }
+		  stmt = conn.createStatement();
+		  ResultSet places = stmt.executeQuery(Model.getPlaces(id));
+		  while(places.next()){
+			  Place place=new Place(places.getString("id"), places.getString("name"));
+			  userData.addPlace(place);
+		  }
+		  for(int i=0; i<userData.people.size(); i++){
+			  System.out.println(userData.people.get(i).first_name);
+			  for(int j=0; j<userData.people.get(i).notes.size(); j++){
+				  System.out.println(userData.people.get(i).notes.get(j).text);
 			  }
 		  }
-		  rs.close();
+		  people.close();
 		  stmt.close();
 		  conn.close();
+		  return gson.toJson(userData);
+		 
 		 }
-  
 		  catch(SQLException se){
 				  se.printStackTrace();
 		   }catch(Exception e){

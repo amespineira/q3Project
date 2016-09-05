@@ -3,7 +3,7 @@ package q3Project.main;
 public class Notes {
     private String type;
     private String text;
- 
+    
     public void setType(String type) {
         this.type = type;
     }

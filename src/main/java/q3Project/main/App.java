@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import org.flywaydb.core.Flyway;
 
-import q3Project.main.Users;
+import q3Project.main.UsersRouter;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
@@ -56,14 +56,14 @@ public class App {
 		  return Auth.Login(req, res, key);
 	   });
 	   post("/verify", (req, res) -> {
-		 Users.Verify(req, res);
+		 UsersRouter.Verify(req, res);
 		 return req;
 	   });
 	   
 	   get("/users/:id/data/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){
 			 String id = req.params("id");
-			 return Users.userData(id);
+			 return UsersRouter.userData(id);
 		   }
 		   else{
 			  return "mismatched user ids";
