@@ -48,7 +48,7 @@ public class Users {
         	String sql;
             sql = "select * from users where email='" + email + "'";
             return sql;
-        }
+        } 
         public String getPass(int user_id){
         	String sql;
             sql = "select * from passwords where user_id='" + user_id + "'";
@@ -56,11 +56,11 @@ public class Users {
         }
         
     }
+    static Model model= new Model();
     public String getAll (){
     	 Connection conn = null;
 		 Statement stmt = null;
 		 try{
-		   Model model = new Model();
 		  Class.forName("org.postgresql.Driver");
 		  conn = DriverManager.getConnection(DB_URL);
 		  stmt = conn.createStatement();

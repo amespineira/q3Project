@@ -179,8 +179,7 @@ public class App {
 		return request;
 	   });
        get("/hello", (req, res) ->	{ 
-    	   
-    	   return users;
+    	   return users.getAll();
        });
 		   
    }
