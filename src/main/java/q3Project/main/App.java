@@ -98,6 +98,13 @@ public class App {
 			   return "mismatched user ids";
 			}
 	   });
+	   get("/people/delete/:person_id/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return PersonRouter.deletePerson(req, Auth.getId(req.params("token"), key));
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
 	   post("/people/:place_id/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key)){
 			   return PersonRouter.newPerson(req, Auth.getId(req.params("token"), key));
