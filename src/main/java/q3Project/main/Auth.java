@@ -33,9 +33,6 @@ public class Auth {
 
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
-    interface Validable {
-        boolean isValid();
-    }
     public static void main(String args[]){
     	// Hash a password for the first time
 //    	String hashed = BCrypt.hashpw("password", BCrypt.gensalt());
@@ -55,13 +52,7 @@ public class Auth {
     public static class QueryBuilder {        
         public static String createUser(String username, String password){
         	String sql;
-        	
             sql = "insert into users values(default, '" + username + "', '" + BCrypt.hashpw(password, BCrypt.gensalt(12))  + "') RETURNING id;";
-            return sql;
-        }
-        public static String createPlace(int user_id, String name){
-        	String sql;
-            sql = "insert into places values(default, " + user_id + ", '" + name  + "')";
             return sql;
         }
         public static String getUser(String input, String type){
@@ -70,20 +61,6 @@ public class Auth {
         		sql = "select * from users where username='" + input + "'";
         	} else {
         		sql = "select * from users where id='" + input + "'";
-        	}
-            return sql;
-        }
-        public static String getPlaces(String user_id){
-        	String sql;
-            sql = "select * from places where user_id='"+ user_id + "'";;
-            return sql;
-        }
-        public static String getPeople(String id, String type){
-        	String sql;
-        	if (type.equals("user_id")){
-        		sql = "select * from places where user_id='"+ id + "'";
-        	} else {
-        		sql = "select * from places where place_id='"+ id + "'";;	
         	}
             return sql;
         }
