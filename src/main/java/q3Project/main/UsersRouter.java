@@ -31,11 +31,40 @@ public class UsersRouter {
             sql = "insert into places values(default, " + user_id + ", '" + place_name  + "') RETURNING id;";
             return sql;
         }
-        
+        public static String deleteNotesFromPlace(String place_id) {
+        	String sql;
+            sql = "delete from notes where id=(select notes.id from notes join people on notes.people_id = people.id where people.place_id=" + place_id + ")";
+			return sql;
+        }  
+        public static String deleteLinksFromPlace(String place_id) {
+        	String sql;
+            sql = "delete from links where id=(select links.id from links join people on links.people_id = people.id where people.place_id=" + place_id + ")";
+			return sql;
+        } 
+        public static String deletePeopleFromPlace(String place_id) {
+        	String sql;
+            sql = "delete from people where person_id="+place_id;
+			return sql;
+        } 
         public static String deletePlace(String place_id){
         	String sql;
             sql = "delete from places where id=" + place_id + " returning id";
             return sql;
+        }
+        public static String deleteNotesFromPeople(String person_id) {
+        	String sql;
+            sql = "delete from notes where person_id="+person_id;
+			return sql;
+        }
+        public static String deleteLinksFromPeople(String person_id) {
+        	String sql;
+            sql = "delete from links where person_id="+person_id;
+			return sql;
+        }
+        public static String deletePerson(String person_id) {
+        	String sql;
+            sql = "delete from people where id="+person_id;
+			return sql;
         }
         
         public static String updatePlace(String id, String new_place_name){
@@ -47,12 +76,6 @@ public class UsersRouter {
         public static String createPerson(String user_id, String place_id, String first, String last){
         	String sql;
             sql = "insert into people values(default,'" + first + "','"+ last + "'," + user_id + ","+ place_id+") RETURNING id;";
-            return sql;
-        }
-        
-        public static String deletePerson(String person_id){
-        	String sql;
-            sql = "delete from people where id=" + person_id + " returning id";
             return sql;
         }
         
@@ -597,5 +620,4 @@ public class UsersRouter {
 	   }
 	 return "updateLink";
     }
-    
 }

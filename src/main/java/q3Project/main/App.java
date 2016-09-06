@@ -130,13 +130,13 @@ public class App {
 			   return "mismatched user ids";
 			}
 	   });
-	   post("/users/:user_id/place/:place_id/delete/:token", (req, res) -> {
+	   /*post("/users/:user_id/place/:place_id/delete/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
 			   return UsersRouter.deletePlace(req);
 		   }else{
 			   return "mismatched user ids";
 			}
-	   });
+	   });*/
    }
 
 }
