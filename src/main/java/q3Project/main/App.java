@@ -70,69 +70,70 @@ public class App {
 		   }
 	   });
 	   
-	   post("/users/:user_id/places/:place_id/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.updatePlace(req);
+	   post("/places/update/:place_id/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return PlaceRouter.updatePlace(req, Auth.getId(req.params("token"), key));
 		   }else{
 			   return "mismatched user ids";
 			}
 	   });
 	   
-	   post("/users/:id/places/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){
-			   return UsersRouter.newPlace(req);
+	   post("/places/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return PlaceRouter.newPlace(req, Auth.getId(req.params("token"), key));
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
+	   post("/people/update/:person_id/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return PersonRouter.updatePerson(req, Auth.getId(req.params("token"), key));
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
+	   post("/people/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return PersonRouter.newPerson(req, Auth.getId(req.params("token"), key));
 		   }else{
 			   return "mismatched user ids";
 			}
 	   });
 	   
-	   post("/users/:user_id/places/:place_id/people/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.newPerson(req);
+	 
+	   post("/notes/update/:note_id/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return NoteRouter.updateNote(req);
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
+	   post("/notes/:person_id/:token/", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   
+			   return NoteRouter.newNote(req, req.params("person_id"));
 		   }else{
 			   return "mismatched user ids";
 			}
 	   });
 	   
-	   post("/users/:user_id/people/:person_id/:token", (req, res) -> {
+	   post("/links/update/:link_id/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.updatePerson(req);
+			   return LinkRouter.updateLink(req);
 		   }else{
 			   return "mismatched user ids";
 			}
 	   });
 	   
-	   post("/users/:user_id/people/:person_id/notes/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.newNote(req);
+	   post("/links/:person_id/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return LinkRouter.newLink(req);
 		   }else{
 			   return "mismatched user ids";
 			}
 	   });
 	   
-	   post("/users/:user_id/notes/:note_id/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.updateNote(req);
-		   }else{
-			   return "mismatched user ids";
-			}
-	   });
-	   
-	   post("/users/:user_id/people/:person_id/links/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.newLink(req);
-		   }else{
-			   return "mismatched user ids";
-			}
-	   });
-	   
-	   post("/users/:user_id/links/:link_id/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.updateLink(req);
-		   }else{
-			   return "mismatched user ids";
-			}
-	   });
+	
 	   /*post("/users/:user_id/place/:place_id/delete/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
 			   return UsersRouter.deletePlace(req);

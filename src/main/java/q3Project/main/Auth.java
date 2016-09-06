@@ -209,6 +209,18 @@ public class Auth {
     	    //don't trust the JWT!
     	}
     }
+    public static String getId(String compactJws, Key key){
+    	try {
+
+    	    
+    	    return Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws).getBody().getSubject();
+    	    //OK, we can trust this JWT
+
+    	} catch (SignatureException e) {
+    		return "exception";
+    	    //don't trust the JWT!
+    	}
+    }
     public static boolean checkToken(String compactJws, Key key, int id){
     	try {
     		System.out.println("printing this");
