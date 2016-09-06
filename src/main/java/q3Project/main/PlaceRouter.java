@@ -125,5 +125,64 @@ public class PlaceRouter {
 	   }
 	 return "newPlace";
     }
-    
+
+    public static String deletePlace(Request req, String id){
+    	Connection conn = null;
+    	Statement check_stmt = null;
+		Statement people_stmt = null;
+		Statement note_stmt= null;
+		Statement link_stmt= null;
+		Statement delete_stmt= null;
+		try{
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection(DB_URL);
+			check_stmt = conn.createStatement();
+			ResultSet place = check_stmt.executeQuery("SELECT * FROM places WHERE id= "+req.params("place_id"));
+			while(place.next()){
+				System.out.println(place.getFetchSize());
+				System.out.println("printing id of place");
+				System.out.println(place.getString("user_id"));
+				System.out.println("pringing id from token");
+				System.out.println(id);
+				if(Integer.parseInt(place.getString("user_id"))==Integer.parseInt(id)){
+					System.out.println("here");
+					people_stmt = conn.createStatement();
+					ResultSet people = check_stmt.executeQuery(Model.selectPeopleFromPlace(req.params("place_id")));
+					while(people.next()){
+						note_stmt= conn.createStatement();
+						note_stmt.executeQuery(Model.deleteNotesFromPeople(people.getString("id")));
+						link_stmt= conn.createStatement();
+						link_stmt.executeQuery(Model.deleteLinksFromPeople(people.getString("id")));
+						people_stmt = conn.createStatement();
+						people_stmt.executeQuery(Model.deletePerson(people.getString("id")));
+					}
+					delete_stmt = conn.createStatement();
+					delete_stmt.executeQuery(Model.deletePlace(req.params("place_id")));
+					return "deleted";
+				}
+				else{
+					return "incorrect user id";
+				}
+			}
+			
+		}
+		catch(SQLException se){
+			  se.printStackTrace();
+	   }catch(Exception e){
+			  e.printStackTrace();
+	   }finally{
+			  try{
+			     if(check_stmt!=null)
+			    	 check_stmt.close();
+			  }catch(SQLException se2){
+			  }
+			  try{
+			     if(conn!=null)
+			        conn.close();
+			  }catch(SQLException se){
+			     se.printStackTrace();
+			  }
+	   }
+	 return "end of delete";
+    }
 }
