@@ -25,7 +25,10 @@ import com.google.gson.JsonParser;
 
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import spark.Route;
-
+import spark.Spark;
+import spark.Filter;
+import spark.Request;
+import spark.Response;
 //import app.NewPlaces;
 
 
@@ -48,7 +51,7 @@ public class App {
        // Start the migration
        flyway.migrate();
        Key key = MacProvider.generateKey();
-
+       enableCORS("*", "*", "*");
 	   post("/auth/signup", (req, res) -> {
 		return Auth.createUser(req, res, key);
 	   });
@@ -155,5 +158,17 @@ public class App {
 			}
 	   });*/
    }
+   private static void enableCORS(final String origin, final String methods, final String headers) {
+	    Spark.before(new Filter() {
+	        @Override
+	        public void handle(Request request, Response response) {
+	            response.header("Access-Control-Allow-Origin", origin);
+	            response.header("Access-Control-Request-Method", methods);
+	            response.header("Access-Control-Allow-Headers", headers);
+	        }
+
+			
+	    });
+	}
 
 }
