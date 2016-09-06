@@ -112,4 +112,37 @@ public class LinkRouter {
 	   }
 	 return "updateLink";
     }
+	   public static String deleteLink(Request req){
+	    	Connection conn = null;
+	    	Statement stmt = null;
+			try{
+				Class.forName("org.postgresql.Driver");
+				conn = DriverManager.getConnection(DB_URL);
+				stmt = conn.createStatement();
+				ResultSet link = stmt.executeQuery(QueryBuilder.deleteLink(req.params("id")));
+				while(link.next()){
+					return "link deleted";
+				}
+				stmt.close();
+				conn.close();
+			}
+			catch(SQLException se){
+				  se.printStackTrace();
+		   }catch(Exception e){
+				  e.printStackTrace();
+		   }finally{
+				  try{
+				     if(stmt!=null)
+				    	 stmt.close();
+				  }catch(SQLException se2){
+				  }
+				  try{
+				     if(conn!=null)
+				        conn.close();
+				  }catch(SQLException se){
+				     se.printStackTrace();
+				  }
+		   }
+		 return "deleteLink";
+	    }
 }

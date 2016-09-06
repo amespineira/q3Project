@@ -115,7 +115,6 @@ public class App {
 			   return "mismatched user ids";
 			}
 	   });
-	   
 	 
 	   post("/notes/update/:note_id/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key)){
@@ -124,7 +123,7 @@ public class App {
 			   return "mismatched user ids";
 			}
 	   });
-	   post("/notes/:person_id/:token/", (req, res) -> {
+	   post("/notes/:person_id/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key)){
 			   
 			   return NoteRouter.newNote(req, req.params("person_id"));
@@ -149,14 +148,20 @@ public class App {
 			}
 	   });
 	   
-	
-	   /*post("/users/:user_id/place/:place_id/delete/:token", (req, res) -> {
-		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
-			   return UsersRouter.deletePlace(req);
+	   post("/notes/:id/delete/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return NoteRouter.deleteNote(req);
 		   }else{
 			   return "mismatched user ids";
 			}
-	   });*/
+	   });
+	   post("/links/:id/delete/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			   return LinkRouter.deleteLink(req);
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
    }
    private static void enableCORS(final String origin, final String methods, final String headers) {
 	    Spark.before(new Filter() {
