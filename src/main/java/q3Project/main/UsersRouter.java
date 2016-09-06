@@ -25,6 +25,49 @@ public class UsersRouter {
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
 	static final QueryBuilder Model= new QueryBuilder();
+	public static String getUser(String id){
+		Gson gson=new Gson();
+    	Connection conn = null;
+		Statement stmt = null;
+		Statement people_stmt = null;
+		 try{
+		  Class.forName("org.postgresql.Driver");
+		  conn = DriverManager.getConnection(DB_URL);
+		  stmt = conn.createStatement();
+		  ResultSet userRes = stmt.executeQuery(Model.getUserNoHash(id));
+		  User userOut= new User();
+		  while(userRes.next()){
+			  userOut.id=userRes.getInt("id");
+			  userOut.username=userRes.getString("username");
+
+		  }
+		  stmt.close();
+		  conn.close();
+		  System.out.println("about to send:");
+		  System.out.println(userOut.id);
+		  System.out.println(userOut.username);
+		  return gson.toJson(userOut);
+		 
+		 }
+		  catch(SQLException se){
+				  se.printStackTrace();
+		   }catch(Exception e){
+				  e.printStackTrace();
+		   }finally{
+				  try{
+				     if(stmt!=null)
+				        stmt.close();
+				  }catch(SQLException se2){
+				  }
+				  try{
+				     if(conn!=null)
+				        conn.close();
+				  }catch(SQLException se){
+				     se.printStackTrace();
+				  }
+		   }
+		 return "JsonData";
+	}
     public static String userData (String id){
     	Gson gson=new Gson();
     	Connection conn = null;
@@ -91,255 +134,8 @@ public class UsersRouter {
       }
     
    
-    public static String newLink(Request req){
-    	Connection conn = null;
-		Statement new_stmt = null;
-		JsonParser parser = new JsonParser();
-		  JsonElement jsonTree = parser.parse(req.body());
-		  JsonElement link_name = null;
-		  JsonElement url = null;
-		  if(jsonTree.isJsonObject()) {
-			  JsonObject jsonObject = jsonTree.getAsJsonObject();
-			  link_name = jsonObject.get("link_name");
-			  url = jsonObject.get("url");
-		  }
-		  
-		try{
-			Class.forName("org.postgresql.Driver");
-			conn = DriverManager.getConnection(DB_URL);
-				new_stmt = conn.createStatement();
-				ResultSet new_link = new_stmt.executeQuery(Model.createLink(link_name.getAsString(), url.getAsString(), req.params("person_id")));
-				while(new_link.next()){
-					new_stmt.close();
-					conn.close();
-					return "link created";
-				}
-		}
-		catch(SQLException se){
-			  se.printStackTrace();
-	   }catch(Exception e){
-			  e.printStackTrace();
-	   }finally{
-			  try{
-			     if(new_stmt!=null)
-			    	 new_stmt.close();
-			  }catch(SQLException se2){
-			  }
-			  try{
-			     if(conn!=null)
-			        conn.close();
-			  }catch(SQLException se){
-			     se.printStackTrace();
-			  }
-	   }
-	 return "newLink";
-    }
     
-    public static String updatePlace(Request req){
-    	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
-		JsonParser parser = new JsonParser();
-		  JsonElement jsonTree = parser.parse(req.body());
-		  JsonElement place_name = null;
-		  if(jsonTree.isJsonObject()) {
-			  JsonObject jsonObject = jsonTree.getAsJsonObject();
-			  place_name = jsonObject.get("name");
-		  }
-		  
-		try{
-			Class.forName("org.postgresql.Driver");
-			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet place = check_stmt.executeQuery(Model.getPlaces(req.params("place_id"), req.params("id"), "id"));
-			if(place.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updatePlace(req.params("place_id"), place_name.getAsString()));
-				while(updated.next()){
-					up_stmt.close();
-					up_stmt.close();
-					conn.close();
-					return "place updated";
-				}
-			}else{
-				return "place doesn't exist";
-			}
-		}
-		catch(SQLException se){
-			  se.printStackTrace();
-	   }catch(Exception e){
-			  e.printStackTrace();
-	   }finally{
-			  try{
-			     if(check_stmt!=null)
-			    	 check_stmt.close();
-			  }catch(SQLException se2){
-			  }
-			  try{
-			     if(conn!=null)
-			        conn.close();
-			  }catch(SQLException se){
-			     se.printStackTrace();
-			  }
-	   }
-	 return "updatedPlace";
-    }
+   
     
-    public static String updatePerson(Request req){
-    	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
-		JsonParser parser = new JsonParser();
-		  JsonElement jsonTree = parser.parse(req.body());
-		  JsonElement first = null;
-		  JsonElement last = null;
-		  JsonElement place_id = null;
-		  if(jsonTree.isJsonObject()) {
-			  JsonObject jsonObject = jsonTree.getAsJsonObject();
-			  place_id = jsonObject.get("place_id");
-			  first = jsonObject.get("first_name");
-			  last = jsonObject.get("last_name");
-		  }
-		  
-		try{
-			Class.forName("org.postgresql.Driver");
-			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet person = check_stmt.executeQuery(Model.getPeople(req.params("user_id")));
-			if(person.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updatePerson(req.params("person_id"), place_id.getAsString(), first.getAsString(), last.getAsString()));
-				while(updated.next()){
-					check_stmt.close();
-					up_stmt.close();
-					conn.close();
-					return "person updated";
-				}
-			}else{
-				return "person doesn't exist";
-			}
-		}
-		catch(SQLException se){
-			  se.printStackTrace();
-	   }catch(Exception e){
-			  e.printStackTrace();
-	   }finally{
-			  try{
-			     if(check_stmt!=null)
-			    	 check_stmt.close();
-			  }catch(SQLException se2){
-			  }
-			  try{
-			     if(conn!=null)
-			        conn.close();
-			  }catch(SQLException se){
-			     se.printStackTrace();
-			  }
-	   }
-	 return "updatePerson";
-    }
-    
-    public static String updateNote(Request req){
-    	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
-		JsonParser parser = new JsonParser();
-		  JsonElement jsonTree = parser.parse(req.body());
-		  JsonElement text = null;
-		  JsonElement type = null;
-		  if(jsonTree.isJsonObject()) {
-			  JsonObject jsonObject = jsonTree.getAsJsonObject();
-			  text = jsonObject.get("text");
-			  type = jsonObject.get("type");
-		  }
-		  
-		try{
-			Class.forName("org.postgresql.Driver");
-			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet note = check_stmt.executeQuery(Model.getNotes(req.params("note_id"), "id"));
-			if(note.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updateNote(req.params("note_id"), text.getAsString(), type.getAsString()));
-				while(updated.next()){
-					check_stmt.close();
-					up_stmt.close();
-					conn.close();
-					return "note updated";
-				}
-			}else{
-				return "note doesn't exist";
-			}
-		}
-		catch(SQLException se){
-			  se.printStackTrace();
-	   }catch(Exception e){
-			  e.printStackTrace();
-	   }finally{
-			  try{
-			     if(check_stmt!=null)
-			    	 check_stmt.close();
-			  }catch(SQLException se2){
-			  }
-			  try{
-			     if(conn!=null)
-			        conn.close();
-			  }catch(SQLException se){
-			     se.printStackTrace();
-			  }
-	   }
-	 return "updateNote";
-    }
-    
-    public static String updateLink(Request req){
-    	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
-		JsonParser parser = new JsonParser();
-		  JsonElement jsonTree = parser.parse(req.body());
-		  JsonElement link_name = null;
-		  JsonElement url = null;
-		  if(jsonTree.isJsonObject()) {
-			  JsonObject jsonObject = jsonTree.getAsJsonObject();
-			  link_name = jsonObject.get("link_name");
-			  url = jsonObject.get("url");
-		  }
-		  
-		try{
-			Class.forName("org.postgresql.Driver");
-			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet link = check_stmt.executeQuery(Model.getLinks(req.params("link_id"), "id"));
-			if(link.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updateLink(req.params("link_id"), link_name.getAsString(), url.getAsString()));
-				while(updated.next()){
-					check_stmt.close();
-					up_stmt.close();
-					conn.close();
-					return "link updated";
-				}
-			}else{
-				return "link doesn't exist";
-			}
-		}
-		catch(SQLException se){
-			  se.printStackTrace();
-	   }catch(Exception e){
-			  e.printStackTrace();
-	   }finally{
-			  try{
-			     if(check_stmt!=null)
-			    	 check_stmt.close();
-			  }catch(SQLException se2){
-			  }
-			  try{
-			     if(conn!=null)
-			        conn.close();
-			  }catch(SQLException se){
-			     se.printStackTrace();
-			  }
-	   }
-	 return "updateLink";
-    }
+
 }

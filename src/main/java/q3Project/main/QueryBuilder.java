@@ -110,7 +110,9 @@ public class QueryBuilder {
         	}
             return sql;
         }
-        
+        public static String getUserNoHash(String id){
+        	return "SELECT id, username FROM users WHERE id="+id;
+        }
         public static String getPeople(String id){
         	return "select * from people where user_id="+id;
         }

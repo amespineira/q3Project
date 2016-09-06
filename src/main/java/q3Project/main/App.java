@@ -72,7 +72,14 @@ public class App {
 			  return "mismatched user ids";
 		   }
 	   });
-	   
+	   get("/users/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key)){
+			 return UsersRouter.getUser(Auth.getId(req.params("token"), key));
+		   }
+		   else{
+			  return "invalid token";
+		   }
+	   });
 	   post("/places/update/:place_id/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key)){
 			   return PlaceRouter.updatePlace(req, Auth.getId(req.params("token"), key));
@@ -174,6 +181,20 @@ public class App {
 
 			
 	    });
+	    Spark.options("/*", (request,response)->{
+
+    	    String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+    	    if (accessControlRequestHeaders != null) {
+    	        response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+    	    }
+
+    	    String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+    	    if(accessControlRequestMethod != null){
+    		response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+    	    }
+
+    	    return "OK";
+    	});  
 	}
 
 }
