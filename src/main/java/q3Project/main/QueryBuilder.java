@@ -14,12 +14,16 @@ public class QueryBuilder {
         }  
         public static String deleteLinksFromPlace(String place_id) {
         	String sql;
+        	
             sql = "delete from links where id=(select links.id from links join people on links.people_id = people.id where people.place_id=" + place_id + ")";
 			return sql;
         } 
+        public static String selectPeopleFromPlace(String place_id){
+        	return "SELECT people.id FROM places JOIN people ON people.place_id=places.id WHERE places.id="+place_id;
+        }
         public static String deletePeopleFromPlace(String place_id) {
         	String sql;
-            sql = "delete from people where person_id="+place_id;
+            sql = "delete from people where person_id="+place_id+" returning id";
 			return sql;
         } 
         public static String deletePlace(String place_id){
@@ -29,17 +33,17 @@ public class QueryBuilder {
         }
         public static String deleteNotesFromPeople(String person_id) {
         	String sql;
-            sql = "delete from notes where person_id="+person_id;
+            sql = "delete from notes where person_id="+person_id+" returning id";
 			return sql;
         }
         public static String deleteLinksFromPeople(String person_id) {
         	String sql;
-            sql = "delete from links where person_id="+person_id;
+            sql = "delete from links where person_id="+person_id+" returning id";
 			return sql;
         }
         public static String deletePerson(String person_id) {
         	String sql;
-            sql = "delete from people where id="+person_id;
+            sql = "delete from people where id="+person_id+" returning id";
 			return sql;
         }
         
