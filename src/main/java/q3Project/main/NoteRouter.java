@@ -39,7 +39,7 @@ public class NoteRouter {
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
 				new_stmt = conn.createStatement();
-				ResultSet new_note = new_stmt.executeQuery(Model.createNote(text.getAsString(), type.getAsString(), id));
+				ResultSet new_note = new_stmt.executeQuery(QueryBuilder.createNote(text.getAsString(), type.getAsString(), id));
 				while(new_note.next()){
 					new_stmt.close();
 					conn.close();
@@ -83,10 +83,10 @@ public class NoteRouter {
 				Class.forName("org.postgresql.Driver");
 				conn = DriverManager.getConnection(DB_URL);
 				check_stmt = conn.createStatement();
-				ResultSet note = check_stmt.executeQuery(Model.getNotes(req.params("note_id"), "id"));
+				ResultSet note = check_stmt.executeQuery(QueryBuilder.getNotes(req.params("note_id"), "id"));
 				if(note.next()){
 					up_stmt = conn.createStatement();
-					ResultSet updated = up_stmt.executeQuery(Model.updateNote(req.params("note_id"), text.getAsString(), type.getAsString()));
+					ResultSet updated = up_stmt.executeQuery(QueryBuilder.updateNote(req.params("note_id"), text.getAsString(), type.getAsString()));
 					while(updated.next()){
 						check_stmt.close();
 						up_stmt.close();
@@ -116,6 +116,38 @@ public class NoteRouter {
 		   }
 		 return "updateNote";
 	    }
-	    
+	   public static String deleteNote(Request req){
+	    	Connection conn = null;
+	    	Statement stmt = null;
+			try{
+				Class.forName("org.postgresql.Driver");
+				conn = DriverManager.getConnection(DB_URL);
+				stmt = conn.createStatement();
+				ResultSet note = stmt.executeQuery(QueryBuilder.deleteNote(req.params("id")));
+				while(note.next()){
+					return "note deleted";
+				}
+				stmt.close();
+				conn.close();
+			}
+			catch(SQLException se){
+				  se.printStackTrace();
+		   }catch(Exception e){
+				  e.printStackTrace();
+		   }finally{
+				  try{
+				     if(stmt!=null)
+				    	 stmt.close();
+				  }catch(SQLException se2){
+				  }
+				  try{
+				     if(conn!=null)
+				        conn.close();
+				  }catch(SQLException se){
+				     se.printStackTrace();
+				  }
+		   }
+		 return "deleteNote";
+	    }
 }
 
