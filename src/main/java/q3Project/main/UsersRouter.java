@@ -1,6 +1,6 @@
 package q3Project.main;
-import java.sql.* ;  // for standard JDBC programs
-import java.math.* ; // for BigDecimal and BigInteger support
+import java.sql.* ;
+import java.math.* ;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
@@ -24,18 +24,27 @@ public class UsersRouter {
 	
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
-    interface Validable {
-        boolean isValid();
-    }
+ 
     public static class Model {        
-        public static String createUser(String username, String password){
+        public static String createPlace(String user_id, String place_name){
         	String sql;
-            sql = "insert into users values(default, '" + username + "', '" + password  + "') RETURNING id;";
+            sql = "insert into places values(default, " + user_id + ", '" + place_name  + "') RETURNING id;";
             return sql;
         }
-        public static String createPlace(int user_id, String name){
+        public static String createPerson(String user_id, String place_id, String first, String last){
         	String sql;
-            sql = "insert into places values(default, " + user_id + ", '" + name  + "')";
+            sql = "insert into people values(default,'" + first + "','"+ last + "'," + user_id + ","+ place_id+") RETURNING id;";
+            return sql;
+        }
+        public static String createNote(String text, String type, String person_id){
+        	String sql;
+            sql = "insert into notes values(default,'" + text + "','"+ type + "'," + person_id + ") RETURNING id;";
+            System.out.print(sql);
+            return sql;
+        }
+        public static String createLink(String name,  String url, String person_id){
+        	String sql;
+            sql = "insert into links values(default,'" + name + "','"+ url + "'," + person_id +") RETURNING id;";
             return sql;
         }
         public static String getUser(String input, String type){
@@ -62,63 +71,6 @@ public class UsersRouter {
             return sql;
         }
     }
-    
-    public static String createUser (Request request, spark.Response response){
-   	 Connection conn = null;
-   	 Statement ue_stmt = null;
-   	 Statement stmt = null;
-		 try{
-		  Class.forName("org.postgresql.Driver");
-		  conn = DriverManager.getConnection(DB_URL);
-		  ue_stmt = conn.createStatement();
-		  JsonParser parser = new JsonParser();
-		  JsonElement jsonTree = parser.parse(request.body());
-		  JsonElement username = null;
-		  JsonElement password = null;
-		  if(jsonTree.isJsonObject()) {
-			  JsonObject jsonObject = jsonTree.getAsJsonObject();
-			  username = jsonObject.get("username");
-			  password = jsonObject.get("password");
-		  }
-		  ResultSet ue_rs = ue_stmt.executeQuery(Model.getUser(username.getAsString(), "username"));
-		  if(ue_rs.next()){
-			  String DBusername = ue_rs.getString("username");
-			  System.out.print("Username taken" + DBusername);
-			  return "Username taken";
-		  } else {
-			  stmt = conn.createStatement();
-			  ResultSet rs = stmt.executeQuery(Model.createUser(username.getAsString(), password.getAsString()));
-			  System.out.print("Username created");
-			  while(ue_rs.next()){
-				  return rs.getString("username") + " created";
-			  } 
-			  rs.close();
-			  stmt.close();
-		  }
-		  ue_rs.close();
-		  ue_stmt.close();
-		  conn.close();
-		 }
-  
-		  catch(SQLException se){
-				  se.printStackTrace();
-		   }catch(Exception e){
-				  e.printStackTrace();
-		   }finally{
-				  try{
-				     if(stmt!=null)
-				        stmt.close();
-				  }catch(SQLException se2){
-				  }
-				  try{
-				     if(conn!=null)
-				        conn.close();
-				  }catch(SQLException se){
-				     se.printStackTrace();
-				  }
-		   }
-		 return "users";
-   }
     
     public static String userData (String id){
     	Gson gson=new Gson();
@@ -185,4 +137,208 @@ public class UsersRouter {
 		 return "jsonData";
       }
     
+    public static String newPlace(Request req){
+    	Connection conn = null;
+    	Statement check_stmt = null;
+		Statement new_stmt = null;
+		JsonParser parser = new JsonParser();
+		  JsonElement jsonTree = parser.parse(req.body());
+		  JsonElement place_name = null;
+		  if(jsonTree.isJsonObject()) {
+			  JsonObject jsonObject = jsonTree.getAsJsonObject();
+			  place_name = jsonObject.get("name");
+		  }
+		  
+		try{
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection(DB_URL);
+			check_stmt = conn.createStatement();
+			ResultSet place = check_stmt.executeQuery(Model.getPlaces(req.params("id")));
+			if(!place.next()){
+				new_stmt = conn.createStatement();
+				ResultSet new_place = new_stmt.executeQuery(Model.createPlace(req.params("id"), place_name.getAsString()));
+				while(new_place.next()){
+					check_stmt.close();
+					new_stmt.close();
+					conn.close();
+					return "place created";
+				}
+			}else{
+				return "note already exists";
+			}
+		}
+		catch(SQLException se){
+			  se.printStackTrace();
+	   }catch(Exception e){
+			  e.printStackTrace();
+	   }finally{
+			  try{
+			     if(check_stmt!=null)
+			    	 check_stmt.close();
+			  }catch(SQLException se2){
+			  }
+			  try{
+			     if(conn!=null)
+			        conn.close();
+			  }catch(SQLException se){
+			     se.printStackTrace();
+			  }
+	   }
+	 return "newPlace";
+    }
+    
+    public static String newPerson(Request req){
+    	Connection conn = null;
+    	Statement check_stmt = null;
+		Statement new_stmt = null;
+		JsonParser parser = new JsonParser();
+		  JsonElement jsonTree = parser.parse(req.body());
+		  JsonElement first = null;
+		  JsonElement last = null;
+		  if(jsonTree.isJsonObject()) {
+			  JsonObject jsonObject = jsonTree.getAsJsonObject();
+			  first = jsonObject.get("first_name");
+			  last = jsonObject.get("last_name");
+		  }
+		  
+		try{
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection(DB_URL);
+			check_stmt = conn.createStatement();
+			ResultSet person = check_stmt.executeQuery(Model.getPeople(req.params("user_id")));
+			if(!person.next()){
+				new_stmt = conn.createStatement();
+				ResultSet new_person = new_stmt.executeQuery(Model.createPerson(req.params("user_id"), req.params("place_id"), first.getAsString(), last.getAsString()));
+				while(new_person.next()){
+					check_stmt.close();
+					new_stmt.close();
+					conn.close();
+					return "person created";
+				}
+			}else{
+				return "person already exists";
+			}
+		}
+		catch(SQLException se){
+			  se.printStackTrace();
+	   }catch(Exception e){
+			  e.printStackTrace();
+	   }finally{
+			  try{
+			     if(check_stmt!=null)
+			    	 check_stmt.close();
+			  }catch(SQLException se2){
+			  }
+			  try{
+			     if(conn!=null)
+			        conn.close();
+			  }catch(SQLException se){
+			     se.printStackTrace();
+			  }
+	   }
+	 return "newPerson";
+    }
+    
+    public static String newNote(Request req){
+    	Connection conn = null;
+    	Statement check_stmt = null;
+		Statement new_stmt = null;
+		JsonParser parser = new JsonParser();
+		  JsonElement jsonTree = parser.parse(req.body());
+		  JsonElement text = null;
+		  JsonElement type = null;
+		  if(jsonTree.isJsonObject()) {
+			  JsonObject jsonObject = jsonTree.getAsJsonObject();
+			  text = jsonObject.get("text");
+			  type = jsonObject.get("type");
+		  }
+		  
+		try{
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection(DB_URL);
+			check_stmt = conn.createStatement();
+			ResultSet note = check_stmt.executeQuery(Model.getNotes(req.params("person_id")));
+			if(!note.next()){
+				new_stmt = conn.createStatement();
+				ResultSet new_note = new_stmt.executeQuery(Model.createNote(text.getAsString(), type.getAsString(), req.params("person_id")));
+				while(new_note.next()){
+					check_stmt.close();
+					new_stmt.close();
+					conn.close();
+					return "note created";
+				}
+			}else{
+				return "note already exists";
+			}
+		}
+		catch(SQLException se){
+			  se.printStackTrace();
+	   }catch(Exception e){
+			  e.printStackTrace();
+	   }finally{
+			  try{
+			     if(check_stmt!=null)
+			    	 check_stmt.close();
+			  }catch(SQLException se2){
+			  }
+			  try{
+			     if(conn!=null)
+			        conn.close();
+			  }catch(SQLException se){
+			     se.printStackTrace();
+			  }
+	   }
+	 return "newNote";
+    }
+    public static String newLink(Request req){
+    	Connection conn = null;
+    	Statement check_stmt = null;
+		Statement new_stmt = null;
+		JsonParser parser = new JsonParser();
+		  JsonElement jsonTree = parser.parse(req.body());
+		  JsonElement link_name = null;
+		  JsonElement url = null;
+		  if(jsonTree.isJsonObject()) {
+			  JsonObject jsonObject = jsonTree.getAsJsonObject();
+			  link_name = jsonObject.get("link_name");
+			  url = jsonObject.get("url");
+		  }
+		  
+		try{
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection(DB_URL);
+			check_stmt = conn.createStatement();
+			ResultSet link = check_stmt.executeQuery(Model.getLinks(req.params("person_id")));
+			if(!link.next()){
+				new_stmt = conn.createStatement();
+				ResultSet new_link = new_stmt.executeQuery(Model.createLink(link_name.getAsString(), url.getAsString(), req.params("person_id")));
+				while(new_link.next()){
+					check_stmt.close();
+					new_stmt.close();
+					conn.close();
+					return "link created";
+				}
+			}else{
+				return "link already exists";
+			}
+		}
+		catch(SQLException se){
+			  se.printStackTrace();
+	   }catch(Exception e){
+			  e.printStackTrace();
+	   }finally{
+			  try{
+			     if(check_stmt!=null)
+			    	 check_stmt.close();
+			  }catch(SQLException se2){
+			  }
+			  try{
+			     if(conn!=null)
+			        conn.close();
+			  }catch(SQLException se){
+			     se.printStackTrace();
+			  }
+	   }
+	 return "newLink";
+    }
 }

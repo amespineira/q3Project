@@ -41,7 +41,7 @@ public class App {
    public static void main(String[] args) {
 	   // Create the Flyway instance
        Flyway flyway = new Flyway();
-
+       
        // Point it to the database
        flyway.setDataSource("jdbc:postgresql://localhost/testdb", null, null);
        flyway.clean();
@@ -52,10 +52,11 @@ public class App {
 	   post("/auth/signup", (req, res) -> {
 		return Auth.createUser(req, res, key);
 	   });
+	   
 	   post("/auth/login", (req, res) -> {
 		  return Auth.Login(req, res, key);
 	   });
-	   
+
 	   get("/users/:id/data/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){
 			 String id = req.params("id");
@@ -64,6 +65,37 @@ public class App {
 		   else{
 			  return "mismatched user ids";
 		   }
+	   });
+	   
+	   post("/users/:id/places/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){
+			   return UsersRouter.newPlace(req);
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
+	   
+	   post("/users/:user_id/places/:place_id/people/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
+			   return UsersRouter.newPerson(req);
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
+	   
+	   post("/users/:user_id/people/:person_id/notes/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
+			   return UsersRouter.newNote(req);
+		   }else{
+			   return "mismatched user ids";
+			}
+	   });
+	   post("/users/:user_id/people/:person_id/links/:token", (req, res) -> {
+		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("user_id")))){
+			   return UsersRouter.newLink(req);
+		   }else{
+			   return "mismatched user ids";
+			}
 	   });
    }
 
