@@ -55,10 +55,6 @@ public class App {
 	   post("/auth/login", (req, res) -> {
 		  return Auth.Login(req, res, key);
 	   });
-	   post("/verify", (req, res) -> {
-		 UsersRouter.Verify(req, res);
-		 return req;
-	   });
 	   
 	   get("/users/:id/data/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){

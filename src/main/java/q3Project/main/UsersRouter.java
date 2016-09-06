@@ -61,15 +61,6 @@ public class UsersRouter {
             sql = "select * from places where user_id='"+ user_id + "'";;
             return sql;
         }
-        public static String getPeople(String id, String type){
-        	String sql;
-        	if (type.equals("user_id")){
-        		sql = "select * from places where user_id='"+ id + "'";
-        	} else {
-        		sql = "select * from places where place_id='"+ id + "'";;	
-        	}
-            return sql;
-        }
     }
     
     public static String createUser (Request request, spark.Response response){
@@ -128,61 +119,6 @@ public class UsersRouter {
 		   }
 		 return "users";
    }
-    
-    public static String Verify (Request request, spark.Response response){
-    	Connection conn = null;
-		Statement stmt = null;
-		 try{
-		  Class.forName("org.postgresql.Driver");
-		  conn = DriverManager.getConnection(DB_URL);
-		  stmt = conn.createStatement();
-		  JsonParser parser = new JsonParser();
-		   JsonElement jsonTree = parser.parse(request.body());
-		   JsonElement inputUsername = null;
-		   JsonElement inputPassword = null;
-		   if(jsonTree.isJsonObject()) {
-			    JsonObject jsonObject = jsonTree.getAsJsonObject();
-			    inputUsername = jsonObject.get("username");
-			    inputPassword = jsonObject.get("password");
-			}
-		  ResultSet rs = stmt.executeQuery(Model.getUser(inputUsername.getAsString(), "username"));
-		  if(rs.next()){
-		     String password = rs.getString("password");
-		     if (password.equals(inputPassword.getAsString())){
-		    	 System.out.print("Authorized");
-		    	 return "Authorized";
-		     } else {
-		    	 System.out.print("Not Found"); 
-		    	 return "Not Found";
-		     }
-		  }
-		  else{
-			 System.out.print("Not Found");
-		  }
-		  rs.close();
-		  stmt.close();
-		  conn.close();
-		 }
-  
-		  catch(SQLException se){
-				  se.printStackTrace();
-		   }catch(Exception e){
-				  e.printStackTrace();
-		   }finally{
-				  try{
-				     if(stmt!=null)
-				        stmt.close();
-				  }catch(SQLException se2){
-				  }
-				  try{
-				     if(conn!=null)
-				        conn.close();
-				  }catch(SQLException se){
-				     se.printStackTrace();
-				  }
-		   }
-		 return "authorized?";
-      }
     
     public static String userData (String id){
     	Gson gson=new Gson();
@@ -246,7 +182,7 @@ public class UsersRouter {
 				     se.printStackTrace();
 				  }
 		   }
-		 return "authorized?";
+		 return "jsonData";
       }
     
 }
