@@ -36,9 +36,7 @@ public class PersonRouter {
 				new_stmt = conn.createStatement();
 				ResultSet new_person = new_stmt.executeQuery(Model.createPerson(userId, req.params("place_id"), first.getAsString(), last.getAsString()));
 				while(new_person.next()){
-					new_stmt.close();
-					conn.close();
-					return "person created";
+					return new_person.getString("id");
 				}
 		}
 		catch(SQLException se){
