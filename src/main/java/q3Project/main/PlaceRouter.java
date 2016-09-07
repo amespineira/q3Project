@@ -37,17 +37,16 @@ public class PlaceRouter {
 			  JsonObject jsonObject = jsonTree.getAsJsonObject();
 			  place_name = jsonObject.get("name");
 		  }
-		  
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.prepareStatement(Model.getPlaces("id"));
+			check_stmt = conn.prepareStatement(Model.getPlaces("place_id"));
 			check_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
 			ResultSet place = check_stmt.executeQuery();
 			if(place.next()){
 				up_stmt = conn.prepareStatement(Model.updatePlace());
-				up_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
-				up_stmt.setString(2, place_name.getAsString());
+				up_stmt.setString(1, place_name.getAsString());
+				up_stmt.setInt(2, Integer.parseInt(req.params("place_id")));
 				ResultSet updated = up_stmt.executeQuery();
 				while(updated.next()){
 					up_stmt.close();
@@ -150,13 +149,7 @@ public class PlaceRouter {
 			check_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
 			ResultSet place = check_stmt.executeQuery();
 			while(place.next()){
-				System.out.println(place.getFetchSize());
-				System.out.println("printing id of place");
-				System.out.println(place.getString("user_id"));
-				System.out.println("pringing id from token");
-				System.out.println(id);
 				if(Integer.parseInt(place.getString("user_id"))==Integer.parseInt(id)){
-					System.out.println("here");
 					check_stmt= conn.prepareStatement(Model.selectPeopleFromPlace());
 					check_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
 					ResultSet people = check_stmt.executeQuery();

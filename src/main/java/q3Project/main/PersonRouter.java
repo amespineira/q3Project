@@ -60,6 +60,7 @@ public class PersonRouter {
 	 return "newPerson";
     }
     public static String updatePerson(Request req, String userId){
+    	System.out.println("updating person");
     	Connection conn = null;
     	PreparedStatement check_stmt = null;
 		PreparedStatement up_stmt = null;
@@ -79,15 +80,19 @@ public class PersonRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.prepareStatement(Model.getPeople());
-			check_stmt.setInt(1, id);
+			check_stmt = conn.prepareStatement(Model.getPerson());
+			System.out.println(req.uri());
+			System.out.println(req.params("person_id"));
+			System.out.println(req.params("token"));
+
+			check_stmt.setInt(1, Integer.parseInt(req.params("person_id")));
 			ResultSet person = check_stmt.executeQuery();
 			if(person.next()){
 				up_stmt = conn.prepareStatement(Model.updatePerson());
-				up_stmt.setInt(1, id);
-				up_stmt.setInt(2, place_id.getAsInt());
-				up_stmt.setString(3, first.getAsString());
-				up_stmt.setString(4, last.getAsString());
+				up_stmt.setInt(1, place_id.getAsInt());
+				up_stmt.setString(2, first.getAsString());
+				up_stmt.setString(3, last.getAsString());
+				up_stmt.setInt(4, person.getInt("id"));
 				
 				ResultSet updated = up_stmt.executeQuery();
 				while(updated.next()){
@@ -97,6 +102,7 @@ public class PersonRouter {
 					return "person updated";
 				}
 			}else{
+				System.out.println("person doesn't exist");
 				return "person doesn't exist";
 			}
 		}
@@ -133,11 +139,7 @@ public class PersonRouter {
 			check_stmt.setInt(1, Integer.parseInt(req.params("person_id")));
 			ResultSet person = check_stmt.executeQuery();
 			while(person.next()){
-				System.out.println(person.getFetchSize());
-				System.out.println("printing id of person");
-				System.out.println(person.getString("user_id"));
-				System.out.println("pringing id from token");
-				System.out.println(id);
+				
 				if(Integer.parseInt(person.getString("user_id"))==Integer.parseInt(id)){
 					note_stmt= conn.prepareStatement(Model.deleteNotesFromPeople());
 					note_stmt.setInt(1, person.getInt("id"));

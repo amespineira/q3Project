@@ -116,6 +116,9 @@ public class QueryBuilder {
         public static String getPeople(){
         	return "select * from people where user_id= ?";
         }
+        public static String getPerson(){
+        	return "select * from people where id= ?";
+        }
         
         public static String getNotes(String type){
         	String sql;
@@ -139,11 +142,15 @@ public class QueryBuilder {
         
         public static String getPlaces(String type){
         	String sql;
-        	if (!type.equals("name")){
+        	if(type.equals("place_id")){
+        		sql = "select * from places where id= ?";
+
+        	} else if (!type.equals("name")){
         		sql = "select * from places where user_id= ?";
         	} else {
         		sql = "select * from places where name= ? and user_id= ? ";
         	}
+        	System.out.println(sql);
             return sql;
         }
     

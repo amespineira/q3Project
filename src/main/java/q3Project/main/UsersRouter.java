@@ -45,9 +45,7 @@ public class UsersRouter {
 		  }
 		  stmt.close();
 		  conn.close();
-		  System.out.println("about to send:");
-		  System.out.println(userOut.id);
-		  System.out.println(userOut.username);
+	
 		  return gson.toJson(userOut);
 		 
 		 }
@@ -109,12 +107,7 @@ public class UsersRouter {
 			  Place place=new Place(places.getString("id"), places.getString("name"));
 			  userData.addPlace(place);
 		  }
-		  for(int i=0; i<userData.people.size(); i++){
-			  System.out.println(userData.people.get(i).first_name);
-			  for(int j=0; j<userData.people.get(i).notes.size(); j++){
-				  System.out.println(userData.people.get(i).notes.get(j).text);
-			  }
-		  }
+		
 		  people.close();
 		  stmt.close();
 		  conn.close();
