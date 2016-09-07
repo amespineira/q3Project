@@ -28,8 +28,8 @@ public class PlaceRouter {
 	
 	public static String updatePlace(Request req, String id){
     	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
+    	PreparedStatement check_stmt = null;
+		PreparedStatement up_stmt = null;
 		JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(req.body());
 		  JsonElement place_name = null;
@@ -41,11 +41,14 @@ public class PlaceRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet place = check_stmt.executeQuery(Model.getPlaces(req.params("place_id"), id, "id"));
+			check_stmt = conn.prepareStatement(Model.getPlaces("id"));
+			check_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
+			ResultSet place = check_stmt.executeQuery();
 			if(place.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updatePlace(req.params("place_id"), place_name.getAsString()));
+				up_stmt = conn.prepareStatement(Model.updatePlace());
+				up_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
+				up_stmt.setString(2, place_name.getAsString());
+				ResultSet updated = up_stmt.executeQuery();
 				while(updated.next()){
 					up_stmt.close();
 					up_stmt.close();
@@ -76,10 +79,11 @@ public class PlaceRouter {
 	 return "updatedPlace";
     }
 
-    public static String newPlace(Request req, String id){
+    public static String newPlace(Request req, String idIn){
     	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement new_stmt = null;
+    	PreparedStatement check_stmt = null;
+		PreparedStatement new_stmt = null;
+		int id=Integer.parseInt(idIn);
 		JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(req.body());
 		  JsonElement place_name = null;
@@ -91,11 +95,17 @@ public class PlaceRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet place = check_stmt.executeQuery(Model.getPlaces(place_name.getAsString(), id, "name"));
+			check_stmt = conn.prepareStatement(Model.getPlaces("name"));
+			check_stmt.setString(1, place_name.getAsString());
+			check_stmt.setInt(2, id);
+
+			ResultSet place = check_stmt.executeQuery();
 			if(!place.next()){
-				new_stmt = conn.createStatement();
-				ResultSet new_place = new_stmt.executeQuery(Model.createPlace(id, place_name.getAsString()));
+				new_stmt = conn.prepareStatement(Model.createPlace());
+				new_stmt.setInt(1, id);
+				new_stmt.setString(2, place_name.getAsString());
+
+				ResultSet new_place = new_stmt.executeQuery();
 				while(new_place.next()){
 					check_stmt.close();
 					new_stmt.close();
@@ -128,16 +138,17 @@ public class PlaceRouter {
 
     public static String deletePlace(Request req, String id){
     	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement people_stmt = null;
-		Statement note_stmt= null;
-		Statement link_stmt= null;
-		Statement delete_stmt= null;
+    	PreparedStatement check_stmt = null;
+    	PreparedStatement people_stmt = null;
+		PreparedStatement note_stmt= null;
+		PreparedStatement link_stmt= null;
+		PreparedStatement delete_stmt= null;
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet place = check_stmt.executeQuery("SELECT * FROM places WHERE id= "+req.params("place_id"));
+			check_stmt = conn.prepareStatement("SELECT * FROM places WHERE id= ?");
+			check_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
+			ResultSet place = check_stmt.executeQuery();
 			while(place.next()){
 				System.out.println(place.getFetchSize());
 				System.out.println("printing id of place");
@@ -146,18 +157,23 @@ public class PlaceRouter {
 				System.out.println(id);
 				if(Integer.parseInt(place.getString("user_id"))==Integer.parseInt(id)){
 					System.out.println("here");
-					people_stmt = conn.createStatement();
-					ResultSet people = check_stmt.executeQuery(Model.selectPeopleFromPlace(req.params("place_id")));
+					check_stmt= conn.prepareStatement(Model.selectPeopleFromPlace());
+					check_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
+					ResultSet people = check_stmt.executeQuery();
 					while(people.next()){
-						note_stmt= conn.createStatement();
-						note_stmt.executeQuery(Model.deleteNotesFromPeople(people.getString("id")));
-						link_stmt= conn.createStatement();
-						link_stmt.executeQuery(Model.deleteLinksFromPeople(people.getString("id")));
-						people_stmt = conn.createStatement();
-						people_stmt.executeQuery(Model.deletePerson(people.getString("id")));
+						note_stmt= conn.prepareStatement(Model.deleteNotesFromPeople());
+						note_stmt.setInt(1, people.getInt("id"));
+						note_stmt.executeQuery();
+						link_stmt= conn.prepareStatement(Model.deleteLinksFromPeople());
+						link_stmt.setInt(1, people.getInt("id"));
+						link_stmt.executeQuery();
+						people_stmt = conn.prepareStatement(Model.deletePerson());
+						people_stmt.setInt(1, people.getInt("id"));
+						people_stmt.executeQuery();
 					}
-					delete_stmt = conn.createStatement();
-					delete_stmt.executeQuery(Model.deletePlace(req.params("place_id")));
+					delete_stmt = conn.prepareStatement(Model.deletePlace());
+					delete_stmt.setInt(1, Integer.parseInt(req.params("place_id")));
+					delete_stmt.executeQuery();
 					return "deleted";
 				}
 				else{

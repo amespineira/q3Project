@@ -46,10 +46,10 @@ public class App {
        Flyway flyway = new Flyway();
        
        // Point it to the database
-       flyway.setDataSource("jdbc:postgresql://localhost/testdb", null, null);
-       flyway.clean();
-       // Start the migration
-       flyway.migrate();
+//       flyway.setDataSource("jdbc:postgresql://localhost/testdb", null, null);
+//       flyway.clean();
+//       // Start the migration
+//       flyway.migrate();
        Key key = MacProvider.generateKey();
        enableCORS("*", "*", "*");
 	   post("/auth/signup", (req, res) -> {

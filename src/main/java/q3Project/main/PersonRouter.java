@@ -1,10 +1,6 @@
 package q3Project.main;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,7 +15,8 @@ public class PersonRouter {
 	
     public static String newPerson(Request req, String userId){
     	Connection conn = null;
-		Statement new_stmt = null;
+		PreparedStatement new_stmt = null;
+		int id=Integer.parseInt(userId);
 		JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(req.body());
 		  JsonElement first = null;
@@ -33,8 +30,12 @@ public class PersonRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-				new_stmt = conn.createStatement();
-				ResultSet new_person = new_stmt.executeQuery(Model.createPerson(userId, req.params("place_id"), first.getAsString(), last.getAsString()));
+				new_stmt = conn.prepareStatement(Model.createPerson());
+				new_stmt.setString(1, first.getAsString());
+				new_stmt.setString(2, last.getAsString());
+				new_stmt.setInt(3, id);
+				new_stmt.setInt(4, Integer.parseInt(req.params("place_id")));
+				ResultSet new_person = new_stmt.executeQuery();
 				while(new_person.next()){
 					return new_person.getString("id");
 				}
@@ -60,8 +61,9 @@ public class PersonRouter {
     }
     public static String updatePerson(Request req, String userId){
     	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
+    	PreparedStatement check_stmt = null;
+		PreparedStatement up_stmt = null;
+		int id=Integer.parseInt(userId);
 		JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(req.body());
 		  JsonElement first = null;
@@ -77,11 +79,17 @@ public class PersonRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet person = check_stmt.executeQuery(Model.getPeople(userId));
+			check_stmt = conn.prepareStatement(Model.getPeople());
+			check_stmt.setInt(1, id);
+			ResultSet person = check_stmt.executeQuery();
 			if(person.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updatePerson(userId, place_id.getAsString(), first.getAsString(), last.getAsString()));
+				up_stmt = conn.prepareStatement(Model.updatePerson());
+				up_stmt.setInt(1, id);
+				up_stmt.setInt(2, place_id.getAsInt());
+				up_stmt.setString(3, first.getAsString());
+				up_stmt.setString(4, last.getAsString());
+				
+				ResultSet updated = up_stmt.executeQuery();
 				while(updated.next()){
 					check_stmt.close();
 					up_stmt.close();
@@ -113,16 +121,17 @@ public class PersonRouter {
     }
     public static String deletePerson(Request req, String id){
     	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement people_stmt = null;
-		Statement note_stmt= null;
-		Statement link_stmt= null;
-		Statement delete_stmt= null;
+    	PreparedStatement check_stmt = null;
+    	PreparedStatement people_stmt = null;
+    	PreparedStatement note_stmt= null;
+    	PreparedStatement link_stmt= null;
+    	PreparedStatement delete_stmt= null;
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet person = check_stmt.executeQuery("SELECT * FROM people WHERE id= "+req.params("person_id"));
+			check_stmt = conn.prepareStatement("SELECT * FROM people WHERE id= ?");
+			check_stmt.setInt(1, Integer.parseInt(req.params("person_id")));
+			ResultSet person = check_stmt.executeQuery();
 			while(person.next()){
 				System.out.println(person.getFetchSize());
 				System.out.println("printing id of person");
@@ -130,12 +139,15 @@ public class PersonRouter {
 				System.out.println("pringing id from token");
 				System.out.println(id);
 				if(Integer.parseInt(person.getString("user_id"))==Integer.parseInt(id)){
-					note_stmt= conn.createStatement();
-					note_stmt.executeQuery(Model.deleteNotesFromPeople(person.getString("id")));
-					link_stmt= conn.createStatement();
-					link_stmt.executeQuery(Model.deleteLinksFromPeople(person.getString("id")));
-					people_stmt = conn.createStatement();
-					people_stmt.executeQuery(Model.deletePerson(person.getString("id")));
+					note_stmt= conn.prepareStatement(Model.deleteNotesFromPeople());
+					note_stmt.setInt(1, person.getInt("id"));
+					note_stmt.executeQuery();
+					link_stmt= conn.prepareStatement(Model.deleteLinksFromPeople());
+					link_stmt.setInt(1, person.getInt("id"));
+					link_stmt.executeQuery();
+					people_stmt = conn.prepareStatement(Model.deletePerson());
+					people_stmt.setInt(1, (person.getInt("id")));
+					people_stmt.executeQuery();
 					return "deleted";
 				}
 				else{

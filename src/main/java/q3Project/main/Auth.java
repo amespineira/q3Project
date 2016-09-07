@@ -50,17 +50,17 @@ public class Auth {
     	
     }
     public static class QueryBuilder {        
-        public static String createUser(String username, String password){
+        public static String createUser(){
         	String sql;
-            sql = "insert into users values(default, '" + username + "', '" + BCrypt.hashpw(password, BCrypt.gensalt(12))  + "') RETURNING id;";
+            sql = "insert into users values(default, ? , ?) RETURNING id;";
             return sql;
         }
-        public static String getUser(String input, String type){
+        public static String getUser(String type){
         	String sql;
         	if (type.equals("username")){
-        		sql = "select * from users where username='" + input + "'";
+        		sql = "select * from users where username= ?";
         	} else {
-        		sql = "select * from users where id='" + input + "'";
+        		sql = "select * from users where id= ?";
         	}
             return sql;
         }
@@ -68,8 +68,8 @@ public class Auth {
     
     public static String createUser (Request request, spark.Response response, Key key){
    	 Connection conn = null;
-   	 Statement ue_stmt = null;
-   	 Statement stmt = null;
+   	 PreparedStatement getStmt = null;
+   	PreparedStatement stmt = null;
    	System.out.println("************************");
 	System.out.println(request.body());
 	System.out.println("************************");
@@ -77,7 +77,6 @@ public class Auth {
 	try{
 		  Class.forName("org.postgresql.Driver");
 		  conn = DriverManager.getConnection(DB_URL);
-		  ue_stmt = conn.createStatement();
 		  JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(request.body());
 		  JsonElement username = null;
@@ -87,14 +86,19 @@ public class Auth {
 			  username = jsonObject.get("username");
 			  password = jsonObject.get("password");
 		  }
-		  ResultSet results = ue_stmt.executeQuery(QueryBuilder.getUser(username.getAsString(), "username"));
+		  getStmt = conn.prepareStatement(QueryBuilder.getUser("username"));
+		  getStmt.setString(1, username.getAsString());
+		  ResultSet results = getStmt.executeQuery();
 		  if(results.next()){
 			  String DBusername = results.getString("username");
 			  System.out.print("Username taken" + DBusername);
 			  return "Username taken";
 		  } else {
-			  stmt = conn.createStatement();
-			  ResultSet rs = stmt.executeQuery(QueryBuilder.createUser(username.getAsString(), password.getAsString()));
+			  stmt = conn.prepareStatement(QueryBuilder.createUser());
+			  stmt.setString(1, username.getAsString());
+			  stmt.setString(2, BCrypt.hashpw(password.getAsString(), BCrypt.gensalt(12)));
+
+			  ResultSet rs = stmt.executeQuery();
 			  System.out.print("Username created");
 			  while(rs.next()){
 				  String compactJws = Jwts.builder()
@@ -107,7 +111,7 @@ public class Auth {
 			  stmt.close();
 		  }
 		  results.close();
-		  ue_stmt.close();
+		  stmt.close();
 		  conn.close();
 		 }
   
@@ -133,7 +137,7 @@ public class Auth {
     
     public static String Login (Request request, spark.Response response, Key key){
     	Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		System.out.println("************************");
 		System.out.println(request.body());
 		System.out.println("************************");
@@ -141,7 +145,7 @@ public class Auth {
 		 try{
 		  Class.forName("org.postgresql.Driver");
 		  conn = DriverManager.getConnection(DB_URL);
-		  stmt = conn.createStatement();
+		  stmt = conn.prepareStatement(QueryBuilder.getUser("username"));
 		  JsonParser parser = new JsonParser();
 		   JsonElement jsonTree = parser.parse(request.body());
 		   JsonElement inputUsername = null;
@@ -151,7 +155,8 @@ public class Auth {
 			    inputUsername = jsonObject.get("username");
 			    inputPassword = jsonObject.get("password");
 			}
-		  ResultSet rs = stmt.executeQuery(QueryBuilder.getUser(inputUsername.getAsString(), "username"));
+		   stmt.setString(1, inputUsername.getAsString());
+		  ResultSet rs = stmt.executeQuery();
 		  if(rs.next()){
 		    String hash = rs.getString("password");
 		    System.out.println(hash);

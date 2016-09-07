@@ -1,10 +1,6 @@
 package q3Project.main;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,7 +15,7 @@ public class LinkRouter {
 	
     public static String newLink(Request req){
     	Connection conn = null;
-		Statement new_stmt = null;
+		PreparedStatement new_stmt = null;
 		JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(req.body());
 		  JsonElement link_name = null;
@@ -33,8 +29,12 @@ public class LinkRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-				new_stmt = conn.createStatement();
-				ResultSet new_link = new_stmt.executeQuery(Model.createLink(link_name.getAsString(), url.getAsString(), req.params("person_id")));
+				new_stmt = conn.prepareStatement(Model.createLink());
+				new_stmt.setString(1, link_name.getAsString());
+				new_stmt.setString(2, url.getAsString());
+				new_stmt.setInt(3,  Integer.parseInt(req.params("person_id")));
+
+				ResultSet new_link = new_stmt.executeQuery();
 				while(new_link.next()){
 					new_stmt.close();
 					conn.close();
@@ -63,8 +63,8 @@ public class LinkRouter {
     
     public static String updateLink(Request req){
     	Connection conn = null;
-    	Statement check_stmt = null;
-		Statement up_stmt = null;
+    	PreparedStatement check_stmt = null;
+    	PreparedStatement up_stmt = null;
 		JsonParser parser = new JsonParser();
 		  JsonElement jsonTree = parser.parse(req.body());
 		  JsonElement link_name = null;
@@ -78,11 +78,15 @@ public class LinkRouter {
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
-			check_stmt = conn.createStatement();
-			ResultSet link = check_stmt.executeQuery(Model.getLinks(req.params("link_id"), "id"));
+			check_stmt = conn.prepareStatement(Model.getLinks("id"));
+			check_stmt.setInt(1, Integer.parseInt(req.params("link_id")));
+			ResultSet link = check_stmt.executeQuery();
 			if(link.next()){
-				up_stmt = conn.createStatement();
-				ResultSet updated = up_stmt.executeQuery(Model.updateLink(req.params("link_id"), link_name.getAsString(), url.getAsString()));
+				up_stmt = conn.prepareStatement(Model.updateLink());
+				up_stmt.setString(1, link_name.getAsString());
+				up_stmt.setString(2, url.getAsString());
+				up_stmt.setInt(3, Integer.parseInt(req.params("link_id"))); 
+				ResultSet updated = up_stmt.executeQuery();
 				while(updated.next()){
 					check_stmt.close();
 					up_stmt.close();
@@ -114,12 +118,13 @@ public class LinkRouter {
     }
 	   public static String deleteLink(Request req){
 	    	Connection conn = null;
-	    	Statement stmt = null;
+	    	PreparedStatement stmt = null;
 			try{
 				Class.forName("org.postgresql.Driver");
 				conn = DriverManager.getConnection(DB_URL);
-				stmt = conn.createStatement();
-				ResultSet link = stmt.executeQuery(QueryBuilder.deleteLink(req.params("id")));
+				stmt = conn.prepareStatement(QueryBuilder.deleteLink());
+				stmt.setInt(1, Integer.parseInt(req.params("id")));
+				ResultSet link = stmt.executeQuery();
 				while(link.next()){
 					return "link deleted";
 				}

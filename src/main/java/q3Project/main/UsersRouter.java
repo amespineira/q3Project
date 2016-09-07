@@ -25,16 +25,18 @@ public class UsersRouter {
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
 	static final QueryBuilder Model= new QueryBuilder();
-	public static String getUser(String id){
+	public static String getUser(String idIn){
 		Gson gson=new Gson();
     	Connection conn = null;
-		Statement stmt = null;
-		Statement people_stmt = null;
+    	int id=Integer.parseInt(idIn);
+		PreparedStatement stmt = null;
+		PreparedStatement people_stmt = null;
 		 try{
 		  Class.forName("org.postgresql.Driver");
 		  conn = DriverManager.getConnection(DB_URL);
-		  stmt = conn.createStatement();
-		  ResultSet userRes = stmt.executeQuery(Model.getUserNoHash(id));
+		  stmt = conn.prepareStatement(Model.getUserNoHash());
+		  stmt.setInt(1, id);
+		  ResultSet userRes = stmt.executeQuery();
 		  User userOut= new User();
 		  while(userRes.next()){
 			  userOut.id=userRes.getInt("id");
@@ -68,35 +70,41 @@ public class UsersRouter {
 		   }
 		 return "JsonData";
 	}
-    public static String userData (String id){
+    public static String userData (String idIn){
     	Gson gson=new Gson();
     	Connection conn = null;
-		Statement stmt = null;
-		Statement people_stmt = null;
+    	int id=Integer.parseInt(idIn);
+		PreparedStatement stmt = null;
+		PreparedStatement temp=null;
+		PreparedStatement people_stmt = null;
 		 try{
 		  Class.forName("org.postgresql.Driver");
 		  conn = DriverManager.getConnection(DB_URL);
-		  stmt = conn.createStatement();
-		  ResultSet people = stmt.executeQuery(Model.getPeople(id));
+		  stmt = conn.prepareStatement(Model.getPeople());
+		  stmt.setInt(1, id);
+		  ResultSet people = stmt.executeQuery();
 		  UserData userData=new UserData();
 		  while(people.next()){
 			 Person next= new Person(people.getString("id"), people.getString("first_name"), people.getString("last_name"), people.getString("user_id"), people.getString("place_id"));
-			 people_stmt = conn.createStatement();
-			 ResultSet notes = people_stmt.executeQuery(Model.getNotes(people.getString("id"), "id"));
+			 people_stmt = conn.prepareStatement(Model.getNotes("id"));
+			 people_stmt.setInt(1, people.getInt("id"));
+			 ResultSet notes = people_stmt.executeQuery();
 			 while(notes.next()){
 				 Note note=new Note(notes.getString("id"), notes.getString("type"), notes.getString("text"));
 				 next.addNote(note);
 			 }
-			 people_stmt = conn.createStatement();
-			 ResultSet links = people_stmt.executeQuery(Model.getLinks(people.getString("id"), "id"));
+			 people_stmt = conn.prepareStatement(Model.getLinks("id"));
+			 people_stmt.setInt(1, people.getInt("id"));
+			 ResultSet links = people_stmt.executeQuery();
 			 while(links.next()){
 				 Link link=new Link(links.getString("id"), links.getString("name"), links.getString("url"));
 				 next.addLink(link);
 			 }
 			 userData.addPerson(next);
 		  }
-		  stmt = conn.createStatement();
-		  ResultSet places = stmt.executeQuery(Model.getPlaces(id, id, "id"));
+		  temp = conn.prepareStatement(Model.getPlaces("id"));
+		  temp.setInt(1, id);
+		  ResultSet places = temp.executeQuery();
 		  while(places.next()){
 			  Place place=new Place(places.getString("id"), places.getString("name"));
 			  userData.addPlace(place);

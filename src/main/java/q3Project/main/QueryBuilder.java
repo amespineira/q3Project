@@ -2,9 +2,9 @@ package q3Project.main;
 
 public class QueryBuilder {
       
-        public static String createPlace(String user_id, String place_name){
+        public static String createPlace(){
         	String sql;
-            sql = "insert into places values(default, " + user_id + ", '" + place_name  + "') RETURNING id;";
+            sql = "insert into places values(default, ?,  ? ) RETURNING id;";
             return sql;
         }
         public static String deleteNotesFromPlace(String place_id) {
@@ -18,86 +18,86 @@ public class QueryBuilder {
             sql = "delete from links where id=(select links.id from links join people on links.people_id = people.id where people.place_id=" + place_id + ")";
 			return sql;
         } 
-        public static String selectPeopleFromPlace(String place_id){
-        	return "SELECT people.id FROM places JOIN people ON people.place_id=places.id WHERE places.id="+place_id;
+        public static String selectPeopleFromPlace(){
+        	return "SELECT people.id FROM places JOIN people ON people.place_id=places.id WHERE places.id= ?";
         }
         public static String deletePeopleFromPlace(String place_id) {
         	String sql;
             sql = "delete from people where person_id="+place_id+" returning id";
 			return sql;
         } 
-        public static String deletePlace(String place_id){
+        public static String deletePlace(){
         	String sql;
-            sql = "delete from places where id=" + place_id + " returning id";
+            sql = "delete from places where id= ? returning id";
             return sql;
         }
-        public static String deleteNotesFromPeople(String person_id) {
+        public static String deleteNotesFromPeople() {
         	String sql;
-            sql = "delete from notes where person_id="+person_id+" returning id";
+            sql = "delete from notes where person_id= ? returning id";
 			return sql;
         }
-        public static String deleteLinksFromPeople(String person_id) {
+        public static String deleteLinksFromPeople() {
         	String sql;
-            sql = "delete from links where person_id="+person_id+" returning id";
+            sql = "delete from links where person_id= ? returning id";
 			return sql;
         }
-        public static String deletePerson(String person_id) {
+        public static String deletePerson() {
         	String sql;
-            sql = "delete from people where id="+person_id+" returning id";
+            sql = "delete from people where id= ? returning id";
 			return sql;
         }
         
-        public static String updatePlace(String id, String new_place_name){
+        public static String updatePlace(){
         	String sql;
-            sql = "update places set name ='" + new_place_name + "' where id=" + id + " RETURNING id;";
+            sql = "update places set name = ? where id= ? RETURNING id;";
             return sql;
         }
         
-        public static String createPerson(String user_id, String place_id, String first, String last){
+        public static String createPerson(){
         	String sql;
-            sql = "insert into people values(default,'" + first + "','"+ last + "'," + user_id + ","+ place_id+") RETURNING id;";
+            sql = "insert into people values(default, ? , ?, ? , ?) RETURNING id;";
             return sql;
         }
         
-        public static String updatePerson(String id, String place_id, String first, String last){
+        public static String updatePerson(){
         	String sql;
-            sql = "update people set place_id =" + place_id + ", first_name ='" + first + "', last_name='" + last  +"' where id=" + id + " RETURNING id;";
+            sql = "update people set place_id = ? , first_name = ? , last_name= ? where id= ? RETURNING id;";
             return sql;
         }
         
-        public static String createNote(String text, String type, String person_id){
+        public static String createNote(){
         	String sql;
-            sql = "insert into notes values(default,'" + text + "','"+ type + "'," + person_id + ") RETURNING id;";
+            sql = "insert into notes values(default, ? , ? , ?) RETURNING id;";
             return sql;
         }
         
-        public static String deleteNote(String note_id){
+        public static String deleteNote(){
         	String sql;
-            sql = "delete from notes where id=" + note_id + " returning id";
+            sql = "delete from notes where id= ? returning id";
             return sql;
         }
         
-        public static String updateNote(String id, String text, String type){
+        public static String updateNote(){
         	String sql;
-            sql = "update notes set text='"+text+"', type='" +type+ "' where id=" + id + " RETURNING id;";
+            sql = "update notes set text= ?, type= ? where id= ? RETURNING id;";
             return sql;
         }
         
-        public static String createLink(String name,  String url, String person_id){
+        public static String createLink(){
         	String sql;
-            sql = "insert into links values(default,'" + name + "','"+ url + "'," + person_id +") RETURNING id;";
+            sql = "insert into links values(default, ? , ? , ?) RETURNING id;";
             return sql;
         }
         
-        public static String deleteLink(String link_id){
+        public static String deleteLink(){
         	String sql;
-            sql = "delete from links where id=" + link_id + " returning id";
+            sql = "delete from links where id= ? returning id";
             return sql;
         }
         
-        public static String updateLink(String id, String link_name, String url){
+        public static String updateLink(){
         	String sql;
-            sql = "update links set name='"+link_name+"', url='" +url+ "' where id=" + id + " RETURNING id;";
+            sql = "update links set name= ?, url= ? where id= ? RETURNING id;";
             return sql;
         }
         
@@ -110,39 +110,39 @@ public class QueryBuilder {
         	}
             return sql;
         }
-        public static String getUserNoHash(String id){
-        	return "SELECT id, username FROM users WHERE id="+id;
+        public static String getUserNoHash(){
+        	return "SELECT id, username FROM users WHERE id= ?";
         }
-        public static String getPeople(String id){
-        	return "select * from people where user_id="+id;
+        public static String getPeople(){
+        	return "select * from people where user_id= ?";
         }
         
-        public static String getNotes(String input, String type){
+        public static String getNotes(String type){
         	String sql;
         	if (!type.equals("text")){
-        		sql = "select * from notes where person_id="+input;
+        		sql = "select * from notes where person_id= ?";
         	} else {
-        		sql = "select * from notes where text='"+input+"'";	
+        		sql = "select * from notes where text= ?";	
         	}
 			return sql;
         }
         
-        public static String getLinks(String input, String type){
+        public static String getLinks(String type){
         	String sql;
         	if (!type.equals("name")){
-        		sql = "select * from links where person_id="+input;
+        		sql = "select * from links where person_id= ?";
         	} else {
-        		sql = "select * from links where name='"+input+"'";
+        		sql = "select * from links where name= ?";
         	}
         	return sql;
         }
         
-        public static String getPlaces(String input, String user_id, String type){
+        public static String getPlaces(String type){
         	String sql;
         	if (!type.equals("name")){
-        		sql = "select * from places where user_id='"+ input + "'";
+        		sql = "select * from places where user_id= ?";
         	} else {
-        		sql = "select * from places where name='"+ input + "' and user_id="+user_id;
+        		sql = "select * from places where name= ? and user_id= ? ";
         	}
             return sql;
         }
