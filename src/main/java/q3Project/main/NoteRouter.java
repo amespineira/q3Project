@@ -19,7 +19,7 @@ import com.google.gson.JsonParser;
 import spark.Request;
 public class NoteRouter {
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
-	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
+	static final String DB_URL = System.getenv("JDBC_DATABASE_URL");
 	static final QueryBuilder Model= new QueryBuilder();
 	
 	public static String newNote(Request req, String id){
