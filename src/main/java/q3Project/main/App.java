@@ -37,7 +37,7 @@ public class App {
    // JDBC driver name and database URL
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 //	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
-	static final String DB_URL = System.getenv("JBDC_DATABASE_URL");
+	static final String DB_URL = System.getenv("JDBC_DATABASE_URL");
     interface Validable {
         boolean isValid();
     }
@@ -46,7 +46,7 @@ public class App {
    public static void main(String[] args) {
 	   // Create the Flyway instance
        Flyway flyway = new Flyway();
-       
+       System.out.println(DB_URL);
        // Point it to the database
        flyway.setDataSource(DB_URL, null, null);
        
