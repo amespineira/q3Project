@@ -52,7 +52,7 @@ public class App {
        
        // Start the migration
        flyway.migrate();
-       
+       Spark.port(Integer.parseInt(System.getenv("PORT")));
        Key key = MacProvider.generateKey();
        enableCORS("*", "*", "*");
 	   post("/auth/signup", (req, res) -> {
