@@ -37,7 +37,7 @@ public class App {
    // JDBC driver name and database URL
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
 //	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
-	static final String DB_URL = System.getenv("JDBC_DATABASE_URL");
+	static final String DB_URL = System.getenv("DATABASE_URL");
     interface Validable {
         boolean isValid();
     }
