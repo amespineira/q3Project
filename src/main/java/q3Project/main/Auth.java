@@ -212,7 +212,10 @@ public class Auth {
     	} catch (SignatureException e) {
     		return false;
     	    //don't trust the JWT!
-    	}
+    	} catch (io.jsonwebtoken.MalformedJwtException x){
+			System.out.println("malformed token");
+			return false;
+    	}	
     }
     public static String getId(String compactJws, Key key){
     	try {
