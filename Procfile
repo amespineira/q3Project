@@ -1,1 +1,1 @@
-web: mvn compile && mvn exec:java
+web: java $JAVA_OPTS -cp target/classes:target/dependency/* App
