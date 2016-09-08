@@ -46,7 +46,6 @@ public class App {
    public static void main(String[] args) {
 	   // Create the Flyway instance
        Flyway flyway = new Flyway();
-       System.out.println(DB_URL);
        // Point it to the database
        flyway.setDataSource(DB_URL, null, null);
        
