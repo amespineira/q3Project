@@ -23,7 +23,7 @@ import spark.Request;
 public class PlaceRouter {
 	
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
-	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
+	static final String DB_URL = System.getenv("JDBC_DATABASE_URL");
 	static final QueryBuilder Model= new QueryBuilder();
 	
 	public static String updatePlace(Request req, String id){

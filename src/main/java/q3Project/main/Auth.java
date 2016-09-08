@@ -32,7 +32,7 @@ import spark.Request;
 public class Auth {
 
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
-	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
+	static final String DB_URL = System.getenv("JDBC_DATABASE_URL");
     public static void main(String args[]){
     	// Hash a password for the first time
 //    	String hashed = BCrypt.hashpw("password", BCrypt.gensalt());
