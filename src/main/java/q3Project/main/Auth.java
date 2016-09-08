@@ -222,6 +222,7 @@ public class Auth {
     	    //OK, we can trust this JWT
 
     	} catch (SignatureException e) {
+    		
     		return "exception";
     	    //don't trust the JWT!
     	}
@@ -242,7 +243,11 @@ public class Auth {
     		System.out.println("sig exception happended");
     		return false;
     	    //don't trust the JWT!
+    	} catch (io.jsonwebtoken.MalformedJwtException x){
+    		System.out.println("malformed token");
+    		return false;
     	}
+    	
     }    
     
 }
