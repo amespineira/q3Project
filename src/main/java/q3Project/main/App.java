@@ -2,6 +2,7 @@ package q3Project.main;
 
 import java.sql.* ;  // for standard JDBC programs
 import java.math.* ; // for BigDecimal and BigInteger support
+import java.net.URISyntaxException;
 import java.security.Key;
 
 import static spark.Spark.get;
@@ -35,7 +36,8 @@ import spark.Response;
 public class App {
    // JDBC driver name and database URL
 	static final String JDBC_DRIVER = "org.postgresql.Driver";
-	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
+//	static final String DB_URL = "jdbc:postgresql://localhost/testdb";
+	static final String DB_URL = System.getenv("JDBC_DATABASE_URL");
     interface Validable {
         boolean isValid();
     }
@@ -46,10 +48,11 @@ public class App {
        Flyway flyway = new Flyway();
        
        // Point it to the database
-//       flyway.setDataSource("jdbc:postgresql://localhost/testdb", null, null);
-//       flyway.clean();
-//       // Start the migration
-//       flyway.migrate();
+       flyway.setDataSource(DB_URL, null, null);
+       
+       // Start the migration
+       flyway.migrate();
+       
        Key key = MacProvider.generateKey();
        enableCORS("*", "*", "*");
 	   post("/auth/signup", (req, res) -> {
@@ -196,5 +199,8 @@ public class App {
     	    return "OK";
     	});  
 	}
-
+   private static Connection getConnection() throws URISyntaxException, SQLException {
+	    String dbUrl = System.getenv("JDBC_DATABASE_URL");
+	    return DriverManager.getConnection(dbUrl);
+	}
 }
