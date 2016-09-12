@@ -51,11 +51,18 @@ public class App {
        
        // Start the migration
        flyway.migrate();
+       Validator val=new Validator();
        Spark.port(Integer.parseInt(System.getenv("PORT")));
        Key key = MacProvider.generateKey();
        enableCORS("*", "*", "*");
 	   post("/auth/signup", (req, res) -> {
-		return Auth.createUser(req, res, key);
+		   String message=val.valUser(req);
+		   if(message.equals("valid")){
+				return Auth.createUser(req, res, key);
+		   }
+		   else{
+			   return message;
+		   }
 	   });
 	   
 	   post("/auth/login", (req, res) -> {
@@ -68,6 +75,9 @@ public class App {
 	   get("/users/:id/data/:token", (req, res) -> {
 		   if(Auth.checkToken(req.params("token"), key, Integer.parseInt(req.params("id")))){
 			 String id = req.params("id");
+			 if(req.params("id").equals("null")){
+				 return "id is null";
+			 }
 			 return UsersRouter.userData(id);
 		   }
 		   else{
