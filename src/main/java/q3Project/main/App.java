@@ -48,7 +48,7 @@ public class App {
        Flyway flyway = new Flyway();
        // Point it to the database
        flyway.setDataSource(DB_URL, null, null);
-       flyway.clean();
+       
        // Start the migration
        flyway.migrate();
        Spark.port(Integer.parseInt(System.getenv("PORT")));
