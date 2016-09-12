@@ -86,6 +86,18 @@ public class Auth {
 			  username = jsonObject.get("username");
 			  password = jsonObject.get("password");
 		  }
+		  if(username.getAsString().length()<5){
+			  return "invalid username";
+		  }
+		  if(username.getAsString().length()>20){
+			  return "invalid username";
+		  }
+		  if(password.getAsString().length()<5){
+			  return "invalid password";
+		  }
+		  if(password.getAsString().length()>20){
+			  return "invalid password";
+		  }
 		  getStmt = conn.prepareStatement(QueryBuilder.getUser("username"));
 		  getStmt.setString(1, username.getAsString());
 		  ResultSet results = getStmt.executeQuery();
