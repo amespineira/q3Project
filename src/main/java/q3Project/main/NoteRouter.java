@@ -34,7 +34,8 @@ public class NoteRouter {
 			  text = jsonObject.get("text");
 			  type = jsonObject.get("type");
 		  }
-		  
+		  System.out.println(text);
+		  System.out.println(type);
 		try{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection(DB_URL);
